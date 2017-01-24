@@ -2,8 +2,12 @@ require_relative "curb_dsl"
 require 'json'
 module Pin
   class Client
-    Login_URL = "https://www.pinterest.com/resource/UserSessionResource/create/"
-    Repin_URL = "https://www.pinterest.com/resource/RepinResource/create/"
+    URLs = {
+      login: "https://www.pinterest.com/resource/UserSessionResource/create/",
+      repin: "https://www.pinterest.com/resource/RepinResource/create/",
+      get_boards: "https://www.pinterest.com/resource/BoardPickerBoardsResource/get/",
+      create_board: "https://uk.pinterest.com/resource/BoardResource/create/"
+    }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
       description: /<meta\s+property=\"og:description\"\s+name=\"og:description\"\s+content=\"(.*?)\"\s+data-app>/,
@@ -14,7 +18,8 @@ module Pin
     class << self
       def login(username_or_email, password)
         self.new do
-          set_uri Login_URL
+          @username = username_or_email
+          set_uri URLs[:login]
           header 'Accept', 'application/json, text/javascript, */*; q=0.01'
           header 'Accept-Language', 'en-US,en;q=0.5'
           header 'Cache-Control', 'no-cache'
@@ -33,14 +38,11 @@ module Pin
 
           set_payload({
             source_url: "/login/",
-            data: {
-              options: {
-                username_or_email: username_or_email,
-                password: password
-              },
-              context: {}
-          }.to_json,
-            module_path: "App()>LoginPage()>Login()>Button(class_name=primary, text=Log In, type=submit, size=large)"
+            module_path: "App()>LoginPage()>Login()>Button(class_name=primary, text=Log In, type=submit, size=large)",
+            data: data_json({
+              username_or_email: username_or_email,
+              password: password
+            })
           })
           set_type_converter -> (payload) {query_params(payload)}
           set_error_handler -> {
@@ -76,6 +78,48 @@ module Pin
       false
     end
 
+    def get_boards
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_payload({
+        source_url: "/pin/create/bookmarklet/?url=",
+        pinFave: 1,
+        description: "",
+        data: data_json({
+          filter: "all",
+          field_set_key: "board_picker"
+        })
+      })
+      set_uri URLs[:get_boards]
+      post
+      JSON.parse(body)['resource_response']['data']['all_boards']
+    end
+
+    def create_board(board_name,privacy,options={})
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_uri URLs[:create_board]
+      set_payload({
+        source_url: ('/%s/' % @username),
+        module_path: 'App(module=[object Object])',
+        data: data_json({
+          name: board_name,
+          privacy: privacy,
+        }.merge(options))
+      })
+      post
+      JSON.parse(body)['resource_response']['data']['id']
+    end
+
+    private
+
+    def data_json(opts={})
+      {
+        options: opts,
+        context: {}
+      }.to_json
+    end
+
     def pin(board_id,pin_url)
       raise 'pin_url is not in the form of https://www.pinterest.com/pin/<pin_id>' unless Regex[:pin_validation] =~ pin_url
       pin_id = $1
@@ -87,20 +131,17 @@ module Pin
       set_cookies(@login_cookies)
       set_payload({
         source_url: ("/pin/%s/" % pin_id),
-        data: {
-          options: {
-            # is_buyable_pin: false,
-            description: decode_html(Regex[:description] =~ body ? $1 : ''),
-            link: (Regex[:link] =~ body ? $1 : ''),
-            is_video: false,
-            board_id: board_id,
-            pin_id: pin_id
-          },
-          context: {}
-        }.to_json,
-        module_path: 'App>ModalManager>Modal>PinCreate>PinCreateBoardPicker>BoardPicker>SelectList(view_type=pinCreate, selected_section_index=undefined, selected_item_index=undefined, highlight_matched_text=true, suppress_hover_events=undefined, scroll_selected_item_into_view=true, select_first_item_after_update=false, item_module=[object Object])'
+        module_path: 'App>ModalManager>Modal>PinCreate>PinCreateBoardPicker>BoardPicker>SelectList(view_type=pinCreate, selected_section_index=undefined, selected_item_index=undefined, highlight_matched_text=true, suppress_hover_events=undefined, scroll_selected_item_into_view=true, select_first_item_after_update=false, item_module=[object Object])',
+        data: data_json({
+          is_buyable_pin: false,
+          description: decode_html(Regex[:description] =~ body ? $1 : ''),
+          link: (Regex[:link] =~ body ? $1 : ''),
+          is_video: false,
+          board_id: board_id,
+          pin_id: pin_id
+        })
       })
-      set_uri Repin_URL
+      set_uri URLs[:repin]
       post
       JSON.parse(body)['resource_response']['data']['id']
     end
