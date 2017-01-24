@@ -46,7 +46,7 @@ module Pin
           set_error_handler -> {
             JSON.parse(body)['resource_response']['error'].to_s
           }
-          post
+          @csrftoken = response_cookies['csrftoken']
         end
       end
     end
@@ -80,6 +80,7 @@ module Pin
       pin_id = $1
       set_uri pin_url
       get
+      header 'X-CSRFToken', @csrftoken
       set_payload({
         source_url: ("/pin/%s/" % pin_id),
         data: {

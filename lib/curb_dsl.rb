@@ -2,7 +2,9 @@ require "curb"
 require 'cgi'
 
 module Curb_DSL
-
+  Regex = {
+    cookie_header: /Set-Cookie: /
+  }
   def self.included(base)
     base.extend Singleton
     base.instance_eval do
@@ -57,7 +59,7 @@ module Curb_DSL
   end
 
   def make_request_of(request_method,&block)
-    @resp_cookies = {}
+    @resp_cookies = nil
     @curl = Curl::Easy.new(@uri) do |http|
       setup_request request_method, http
     end
@@ -105,11 +107,15 @@ module Curb_DSL
   end
 
   def response_cookies
-    if @resp_cookies.empty?
-      @curl.on_header {|header| @resp_cookies[$1] = $2 if header =~ /^Set-Cookie: ([^=])=([^;]+;)/}
-      @resp_cookies
-    else
-      @resp_cookies
+    @resp_cookies ||=
+    @curl.header_str.split("\r\n").each_with_object({}) do |header,headers|
+      if header =~ Regex[:cookie_header]
+        header.gsub(Regex[:cookie_header],'').split(';').each do |segment|
+          unless segment =~ /secure/
+            headers[$1.strip.downcase] = $2.gsub('"','') if segment =~ /(.*?)=(.*?)($|;|,(?! ))/
+          end
+        end
+      end
     end
   end
 
@@ -130,7 +136,7 @@ module Curb_DSL
     http.username = @username || nil
     http.password = @password || nil
     http.useragent = "curb"
-    http.multipart_form_post = @form_fields ? true : false
+    http.multipart_form_post = @form_field_name ? true : false
     if @cookies
       http.enable_cookies = true
       http.cookies = (@cookies.is_a? String) ? @cookies : @cookies.inject("") {|cookies,data| "%s%s=%s;" % data.unshift(cookies) }
