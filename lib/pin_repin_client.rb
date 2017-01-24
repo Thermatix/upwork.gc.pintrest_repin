@@ -98,7 +98,7 @@ module Pin
       })
       set_uri Repin_URL
       post
-      Json.parse(body)['resource_response']['data']['id']
+      JSON.parse(body)['resource_response']['data']['id']
     end
   end
 end
