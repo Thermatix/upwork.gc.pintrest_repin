@@ -80,7 +80,6 @@ module Pin
       pin_id = $1
       set_uri pin_url
       get
-      set_uri Repin_URL
       set_payload({
         source_url: ("/pin/%s/" % pin_id),
         data: {
@@ -95,6 +94,7 @@ module Pin
         }.to_json,
         module_path: 'App>ModalManager>Modal>PinCreate>PinCreateBoardPicker>BoardPicker>SelectList(view_type=pinCreate, selected_section_index=undefined, selected_item_index=undefined, highlight_matched_text=true, suppress_hover_events=undefined, scroll_selected_item_into_view=true, select_first_item_after_update=false, item_module=[object Object])'
       })
+      set_uri Repin_URL
       post
       Json.parse(body)['resource_response']['data']['id']
     end
