@@ -1,0 +1,12 @@
+GEM
+  specs:
+    curb (0.9.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  curb (~> 0.9)
+
+BUNDLED WITH
+   1.13.7
