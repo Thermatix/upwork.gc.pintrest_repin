@@ -32,7 +32,7 @@ module Pin
           set_cookies({ ":_auth" => '0',csrftoken: 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'})
 
           set_payload({
-            source_uri: "/login/",
+            source_url: "/login/",
             data: {
               options: {
                 username_or_email: username_or_email,
@@ -47,7 +47,7 @@ module Pin
             JSON.parse(body)['resource_response']['error'].to_s
           }
           post
-          @csrftoken = response_cookies['csrftoken']
+          @login_cookies = response_cookies
         end
       end
     end
@@ -59,7 +59,7 @@ module Pin
     def repin_multi(*args)
       case true
       when args.first.is_a?(String)
-        args.each_with_object(args.shift).map do |pin_url,board_id|
+        args.last.each_with_object(args.shift).map do |pin_url,board_id|
           pin board_id,pin_url
         end
       when args.first.is_a?(Array)
@@ -81,16 +81,20 @@ module Pin
       pin_id = $1
       set_uri pin_url
       get
-      header 'X-CSRFToken', @csrftoken
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      header 'Referer', pin_url
+
+      set_cookies(@login_cookies)
       set_payload({
         source_url: ("/pin/%s/" % pin_id),
         data: {
           options: {
-            is_buyabl5e_pin: false,
+            # is_buyable_pin: false,
             description: decode_html(Regex[:description] =~ body ? $1 : ''),
             link: (Regex[:link] =~ body ? $1 : ''),
             is_video: false,
-            board_id: board_id
+            board_id: board_id,
+            pin_id: pin_id
           },
           context: {}
         }.to_json,

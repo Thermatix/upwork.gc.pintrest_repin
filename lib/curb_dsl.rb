@@ -38,7 +38,6 @@ module Curb_DSL
 
   module Singleton
     def request(&block)
-      puts block
       self.new(&block).body
     end
 
@@ -68,11 +67,7 @@ module Curb_DSL
     if @form_fields
       @curl.http_post(*@form_field)
     else
-      if @payload
-        @curl.http_post(@url,get_payload)
-      else
-        @curl.http request_method
-      end
+      @curl.http request_method
     end
     if @curl.response_code == 301
       @uri =  @curl.redirect_url
@@ -104,6 +99,10 @@ module Curb_DSL
 
   def body
     @curl.body
+  end
+
+  def response_code
+    @curl.response_code
   end
 
   def response_cookies
