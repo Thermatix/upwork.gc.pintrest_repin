@@ -32,7 +32,7 @@ module Pin
           set_cookies({ ":_auth" => '0',csrftoken: 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'})
 
           set_payload({
-            source_ury: "/login/",
+            source_uri: "/login/",
             data: {
               options: {
                 username_or_email: username_or_email,
