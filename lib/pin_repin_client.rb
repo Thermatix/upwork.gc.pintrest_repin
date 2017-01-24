@@ -46,6 +46,7 @@ module Pin
           set_error_handler -> {
             JSON.parse(body)['resource_response']['error'].to_s
           }
+          post
           @csrftoken = response_cookies['csrftoken']
         end
       end
