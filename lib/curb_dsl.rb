@@ -49,11 +49,12 @@ module Curb_DSL
 
 
   def initialize(&block)
-    @headers = {}
-    instance_eval(&block) if block
+    @headers ||= {}
+    instance_eval(&block) if block_given?
   end
 
   def header(name, content)
+    @headers ||= {}
     @headers[name] = content
   end
 
@@ -75,10 +76,11 @@ module Curb_DSL
     end
     if @curl.response_code != 200
       if @error_handler
-        puts @error_handler.call
+        puts @error_handler.call unless @ignore_error
       else
       end
     end
+    @ignore_error = false
   end
 
   def status_code
@@ -95,6 +97,10 @@ module Curb_DSL
 
   def post_body
     get_payload
+  end
+
+  def ignore_error
+    @ignore_error = true
   end
 
   def body

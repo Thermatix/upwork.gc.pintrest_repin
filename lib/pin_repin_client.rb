@@ -1,5 +1,6 @@
 require_relative "curb_dsl"
 require 'json'
+require 'nokogiri'
 module Pin
   class Client
     attr_reader :username, :login_cookies
@@ -7,7 +8,9 @@ module Pin
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
       get_boards: "https://www.pinterest.com/resource/BoardPickerBoardsResource/get/",
-      create_board: "https://uk.pinterest.com/resource/BoardResource/create/"
+      create_board: "https://uk.pinterest.com/resource/BoardResource/create/",
+      get_pins: "http://pinterestapi.co.uk/%s/pins?page=%s",
+      get_recent_pins: "https://www.pinterest.com/%s/%s.rss"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
@@ -19,8 +22,8 @@ module Pin
     class << self
       def login(username_or_email, password)
         self.new do
-          @username = username_or_email
           set_uri URLs[:login]
+
           set_cookies({ ":_auth" => '0',csrftoken: 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'})
 
           set_payload({
@@ -32,6 +35,7 @@ module Pin
             })
           })
           post
+          @username = username_or_email
           @login_cookies = response_cookies
         end
       end
@@ -58,7 +62,7 @@ module Pin
       set_error_handler -> {
         JSON.parse(body)['resource_response']['error'].to_s
       }
-      super(&block)
+      super(&block) if block_given?
     end
 
     def repin(board_id,pin_url)
@@ -84,6 +88,36 @@ module Pin
       end
       false
     end
+
+    def get_recent_pins(board_name)
+      puts URLs[:get_recent_pins] % [@username,board_name]
+      set_cookies @login_cookies
+      set_uri URLs[:get_recent_pins] % [@username,board_name]
+      ignore_error
+      get
+      Nokogiri::HTML(body).xpath('//rss//channel//item').map do |item|
+        {
+          title:        item.xpath('.//title').text,
+          link:         item.xpath('.//link').text,
+          description:  item.xpath('.//description').text,
+          pubDate:      item.xpath('.//pubdate').text,
+          guid:         item.xpath('.//guid').text
+        }
+
+      end
+    end
+
+    # def get_pins(board_id)
+    # keep_going = true
+    # page = 0
+    # results = []
+      # while keep_going
+      #   set_uri URLs[:get_pins]  % [@username,page]
+      #   get
+      #   results + JSON.parse(body)['body']
+      #   keep_going = false unless 
+      # end
+    # end
 
     def get_boards
       header 'X-CSRFToken', @login_cookies['csrftoken']
