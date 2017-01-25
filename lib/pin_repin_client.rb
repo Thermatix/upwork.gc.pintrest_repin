@@ -37,7 +37,7 @@ module Pin
       end
     end
 
-    def initialize(username_or_email="",login_cookies={})
+    def initialize(username_or_email="",login_cookies={},&block)
       @username = username_or_email
       @login_cookies = login_cookies
       header 'Accept', 'application/json, text/javascript, */*; q=0.01'
@@ -58,7 +58,7 @@ module Pin
       set_error_handler -> {
         JSON.parse(body)['resource_response']['error'].to_s
       }
-
+      super(&block)
     end
 
     def repin(board_id,pin_url)
