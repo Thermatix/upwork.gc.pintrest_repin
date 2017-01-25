@@ -90,9 +90,8 @@ module Pin
     end
 
     def get_recent_pins(board_name,username=@username)
-      puts URLs[:get_recent_pins] % [username,board_name]
       set_cookies @login_cookies
-      set_uri URLs[:get_recent_pins] % [@username,board_name]
+      set_uri URLs[:get_recent_pins] % [username,board_name]
       ignore_error
       get
       Nokogiri::HTML(body).xpath('//rss//channel//item').map do |item|
