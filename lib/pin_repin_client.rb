@@ -10,6 +10,7 @@ module Pin
       get_boards: "https://www.pinterest.com/resource/BoardPickerBoardsResource/get/",
       create_board: "https://uk.pinterest.com/resource/BoardResource/create/",
       get_pins: "http://pinterestapi.co.uk/%s/pins?page=%s",
+      get_pin: "https://www.pinterest.com/resource/PinResource/get",
       get_recent_pins: "https://www.pinterest.com/%s/%s.rss"
     }
     Regex = {
@@ -87,6 +88,25 @@ module Pin
         end
       end
       false
+    end
+
+    def get_pin(pin_id)
+      set_uri URLs[:get_pin]
+      set_cookies @login_cookies
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_payload({
+        source_url: "/pin/%s/" % pin_id,
+        module_path: "App>HomePage>AuthHomePageWrapper>AuthHomePage>Grid>GridItems>Pin(show_tenzing_like=true, show_pinner=true, component_type=0, show_feedback_tool=true, hide_comments_pfy_interests=true, show_board=true, insert_on_trigger=true, use_native_image_width=true, dynamic_insertion_channel=homefeed, is_homefeed_pin_credits=true, show_reason=true, in_image_only_hf=false, show_pinned_from=false, show_more_ring=false, resource=PinResource(main_module_name=null, id=%s))" % pin_id,
+        data: data_json({
+          id: pin_id,
+          field_set_key: "detailed",
+          ptrf: "null",
+          fetch_visual_search_objects: "true",
+          allow_stale: true
+        })
+      })
+      post
+      JSON.parse(body)['resource_response']['data']
     end
 
     def get_recent_pins(board_name,username=@username)

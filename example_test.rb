@@ -8,9 +8,12 @@ client = Pin::Client.login('testusername','testpassword')
 #restore previous login
 # client = Pin::Client.new(username,login_cookies)
 
-#25 most recent pins
-puts client.get_recent_pins('-cool-guitars')[2]
-puts client.get_recent_pins('-cool-guitars','upworktest1')[2]
+#most recent pins
+# puts client.get_recent_pins('-cool-guitars')[2]
+# puts client.get_recent_pins('-cool-guitars','upworktest1')[2]
+
+#detailed infomation on a single pin
+# puts client.get_pin('pin_id')
 
 #create new board
 # client.create_board(
