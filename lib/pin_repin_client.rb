@@ -2,6 +2,7 @@ require_relative "curb_dsl"
 require 'json'
 module Pin
   class Client
+    attr_reader :username, :login_cookies
     URLs = {
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
@@ -20,20 +21,6 @@ module Pin
         self.new do
           @username = username_or_email
           set_uri URLs[:login]
-          header 'Accept', 'application/json, text/javascript, */*; q=0.01'
-          header 'Accept-Language', 'en-US,en;q=0.5'
-          header 'Cache-Control', 'no-cache'
-          header 'DNT','1'
-          header  'Host', 'www.pinterest.com'
-          header 'Origin', 'https://www.pinterest.com'
-          header 'Referer', 'https://www.pinterest.com/'
-          header 'User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
-          header 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'
-          header 'X-APP-VERSION', '18733c1'
-          header 'X-CSRFToken', 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'
-          header 'X-NEW-APP', '1'
-          header 'X-Pinterest-AppState', 'active'
-          header 'X-Requested-With', 'XMLHttpRequest'
           set_cookies({ ":_auth" => '0',csrftoken: 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'})
 
           set_payload({
@@ -44,14 +31,34 @@ module Pin
               password: password
             })
           })
-          set_type_converter -> (payload) {query_params(payload)}
-          set_error_handler -> {
-            JSON.parse(body)['resource_response']['error'].to_s
-          }
           post
           @login_cookies = response_cookies
         end
       end
+    end
+
+    def initialize(username_or_email="",login_cookies={})
+      @username = username_or_email
+      @login_cookies = login_cookies
+      header 'Accept', 'application/json, text/javascript, */*; q=0.01'
+      header 'Accept-Language', 'en-US,en;q=0.5'
+      header 'Cache-Control', 'no-cache'
+      header 'DNT','1'
+      header  'Host', 'www.pinterest.com'
+      header 'Origin', 'https://www.pinterest.com'
+      header 'Referer', 'https://www.pinterest.com/'
+      header 'User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
+      header 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'
+      header 'X-APP-VERSION', '18733c1'
+      header 'X-CSRFToken', 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'
+      header 'X-NEW-APP', '1'
+      header 'X-Pinterest-AppState', 'active'
+      header 'X-Requested-With', 'XMLHttpRequest'
+      set_type_converter -> (payload) {query_params(payload)}
+      set_error_handler -> {
+        JSON.parse(body)['resource_response']['error'].to_s
+      }
+
     end
 
     def repin(board_id,pin_url)

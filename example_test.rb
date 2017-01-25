@@ -1,11 +1,21 @@
 require_relative 'lib/pin_repin_client.rb'
 
+#new login
 client = Pin::Client.login('testusername','testpassword')
+#store these values (in cookies, session, etc) for use in later requests
+login_cookies = client.login_cookies
+username = client.username
+#restore previous login
+client = Pin::Client.new(username,login_cookies)
+
+#create new board
 client.create_board(
   "testytestytestytesty",
   "public",
   description: "this is just a test board"
 )
+
+#retrive all boards for logged in user
 puts client.get_boards
 
 # single repin
