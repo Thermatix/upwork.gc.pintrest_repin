@@ -10,6 +10,7 @@ client = Pin::Client.login('testusername','testpassword')
 
 #25 most recent pins
 puts client.get_recent_pins('-cool-guitars')[2]
+puts client.get_recent_pins('-cool-guitars','some_username')[2]
 
 #create new board
 # client.create_board(
