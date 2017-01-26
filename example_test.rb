@@ -10,7 +10,7 @@ client = Pin::Client.login('testusername','testpassword')
 
 #most recent pins
 # puts client.get_recent_pins('-cool-guitars')[2]
-# puts client.get_recent_pins('-cool-guitars','upworktest1')[2]
+# puts client.get_recent_pins('-cool-guitars','otherusername')[2]
 
 #detailed infomation on a single pin
 # puts client.get_pin('pin_id')
