@@ -77,7 +77,6 @@ module Curb_DSL
     if @curl.response_code != 200
       if @error_handler
         puts @error_handler.call unless @ignore_error
-      else
       end
     end
     @ignore_error = false
