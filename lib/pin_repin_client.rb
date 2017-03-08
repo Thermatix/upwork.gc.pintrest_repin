@@ -61,12 +61,7 @@ module Pin
       header 'X-Requested-With', 'XMLHttpRequest'
       set_type_converter -> (payload) {query_params(payload)}
       set_error_handler -> {
-        begin
         JSON.parse(body)['resource_response']['error'].to_s
-        rescue  JSON::ParserError => e
-          puts e
-          false
-        end
       }
       super(&block) if block_given?
     end
@@ -131,8 +126,7 @@ module Pin
           }
 
         end
-      when 400
-        puts 'YAY FALSE'
+      when 404
         false
       end
     end

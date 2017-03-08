@@ -58,7 +58,8 @@ module Curb_DSL
     @headers[name] = content
   end
 
-  def make_request_of(request_method,&block)
+  def make_request_of(request_method,i_e =nil,&block)
+    i_e ||= @ignore_error
     @resp_cookies = nil
     @curl = Curl::Easy.new(@uri) do |http|
       setup_request request_method, http
@@ -72,11 +73,11 @@ module Curb_DSL
     end
     if @curl.response_code == 301
       @uri =  @curl.redirect_url
-      make_request_of request_method
+      make_request_of request_method, i_e
     end
     if @curl.response_code != 200
       if @error_handler
-        puts @error_handler.call unless @ignore_error
+        puts @error_handler.call unless i_e
       end
     end
     @ignore_error = false
