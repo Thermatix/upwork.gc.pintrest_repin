@@ -12,8 +12,10 @@ module Pin
       get_pins: "http://pinterestapi.co.uk/%s/pins?page=%s",
       get_pin: "https://www.pinterest.com/resource/PinResource/get",
       get_recent_pins: "https://www.pinterest.com/%s/%s.rss",
-      follow: "https://www.pinterest.com/resource/UserFollowResource/create/",
-      unfollow: "https://uk.pinterest.com/resource/UserFollowResource/delete/",
+      follow_user: "https://www.pinterest.com/resource/UserFollowResource/create/",
+      unfollow_user: "https://uk.pinterest.com/resource/UserFollowResource/delete/",
+      follow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/create/',
+      unfollow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/delete/',
       followers: "https://www.pinterest.com/%s/followers/"
     }
     Regex = {
