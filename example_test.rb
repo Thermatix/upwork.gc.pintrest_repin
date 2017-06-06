@@ -1,12 +1,16 @@
 require_relative 'lib/pin_repin_client.rb'
 
 #new login
-client = Pin::Client.login('testusername','testpassword')
+client = Pin::Client.login('username','password')
 #store these values (in cookies, session, etc) for use in later requests
 # login_cookies = client.login_cookies
 # username = client.username
 #restore previous login
 # client = Pin::Client.new(username,login_cookies)
+# client.follow_user('sqearlworld', '796081809040378011')
+# client.unfollow_user('sqearlworld', '796081809040378011')
+# client.follow_board('sqearlworld','chairs', '796081740320928279')
+# client.unfollow_board('sqearlworld','chairs', '796081740320928279')
 
 #most recent pins
 # puts client.get_recent_pins('-cool-guitars')[2]
