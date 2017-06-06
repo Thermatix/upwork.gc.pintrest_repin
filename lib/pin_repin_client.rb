@@ -3,7 +3,7 @@ require 'json'
 require 'nokogiri'
 module Pin
   class Client
-    attr_reader :username, :login_cookies, :uk
+    attr_reader :username, :login_cookies, :sub
     URLs = {
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
@@ -97,7 +97,7 @@ module Pin
     end
 
     def get_pin(pin_id)
-      set_uri URLs[:get_pin]
+      set_uri subdomain(URLs[:get_pin])
       set_cookies @login_cookies
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_payload({
@@ -142,7 +142,7 @@ module Pin
     # page = 0
     # results = []
       # while keep_going
-      #   set_uri URLs[:get_pins]  % [@username,page]
+      #   set_uri subdomain(URLs[:get_pins]  % [@username,page])
       #   get
       #   results + JSON.parse(body)['body']
       #   keep_going = false unless 
@@ -161,7 +161,7 @@ module Pin
           field_set_key: "board_picker"
         })
       })
-      set_uri URLs[:get_boards]
+      set_uri subdomain(URLs[:get_boards])
       post
       JSON.parse(body)['resource_response']['data']['all_boards']
     end
@@ -169,7 +169,7 @@ module Pin
     def create_board(board_name,privacy,options={})
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:create_board]
+      set_uri subdomain(URLs[:create_board])
       set_payload({
         source_url: ('/%s/' % @username),
         module_path: 'App(module=[object Object])',
@@ -185,7 +185,7 @@ module Pin
     def follow_user(user_name, user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:follow_user]
+      set_uri subdomain(URLs[:follow_user])
       set_payload({
         source_url: ('/%s/' % user_name),
         module_path: 'App(module=[object Object], state_hasSpellCheck=false)',
@@ -200,7 +200,7 @@ module Pin
     def unfollow_user(user_name,user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:unfollow_user]
+      set_uri subdomain(URLs[:unfollow_user])
       set_payload({
         source_url: ('/%s/' % user_name),
         data: data_json({
@@ -214,7 +214,7 @@ module Pin
     def follow_board(user_name,board_name,board_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:follow_board]
+      set_uri subdomain(URLs[:follow_board])
       set_payload({
         source_url: ('/%s/%s/' % [user_name,board_name]),
         data: data_json({
@@ -228,7 +228,7 @@ module Pin
     def unfollow_board(user_name,board_name,board_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:unfollow_board]
+      set_uri subdomain(URLs[:unfollow_board])
       set_payload({
         source_url: ('/%s/%s/' % [user_name,board_name]),
         data: data_json({
@@ -243,7 +243,7 @@ module Pin
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
       source_url = '/%s/followers' % username
-      set_uri URLs[:followers] + query_params({
+      set_uri subdomain(URLs[:followers]) + query_params({
         source_url: source_url,
         data: data_json({
           hide_find_friends_rep: hffr,
@@ -257,7 +257,7 @@ module Pin
         results += result['resource_response']['data']
         bookmark = result['resource']['options']['bookmarks'].first
         break if bookmark == '-end-'
-        set_uri URLs[:followers] + query_params({
+        set_uri subdomain(URLs[:followers]) + query_params({
           source_url: source_url,
           data: data_json({
             bookmarks:[bookmark],
@@ -305,7 +305,7 @@ module Pin
           pin_id: pin_id
         })
       })
-      set_uri URLs[:repin]
+      set_uri subdomain(URLs[:repin])
       post
       JSON.parse(body)['resource_response']['data']['id']
     end
