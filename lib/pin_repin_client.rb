@@ -14,7 +14,7 @@ module Pin
       get_recent_pins: "https://www.pinterest.com/%s/%s.rss",
       follow: "https://www.pinterest.com/resource/UserFollowResource/create/",
       unfollow: "https://uk.pinterest.com/resource/UserFollowResource/delete/",
-      followers: "https://www.pinterest.com/%s"
+      followers: "https://www.pinterest.com/%s/followers/"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
@@ -179,12 +179,12 @@ module Pin
       JSON.parse(body)['resource_response']['data']['id']
     end
 
-    def follow(user_id)
+    def follow(user_name, user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
       set_uri URLs[:follow]
       set_payload({
-        source_url: '/sqearlworld/',
+        source_url: ('/%s/' % user_name),
         module_path: 'App(module=[object Object], state_hasSpellCheck=false)',
         data: data_json({
           user_id: user_id
@@ -194,12 +194,12 @@ module Pin
       body
     end
 
-    def unfollow(user_id)
+    def unfollow(user_name,user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
       set_uri URLs[:unfollow]
       set_payload({
-        source_url: '/sqearlworld/',
+        source_url: ('/%s/' % user_name),
         data: data_json({
           user_id: user_id
         })
@@ -209,6 +209,7 @@ module Pin
     end
 
     def followers(of)
+    
     end
     private
 
