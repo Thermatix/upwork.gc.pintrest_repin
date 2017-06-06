@@ -12,7 +12,7 @@ module Pin
       get_pins: "http://pinterestapi.co.uk/%s/pins?page=%s",
       get_pin: "https://www.pinterest.com/resource/PinResource/get",
       get_recent_pins: "https://www.pinterest.com/%s/%s.rss",
-      follow: "https://www.pinterest.com/resource/UserFollowResource/create/%s",
+      follow: "https://www.pinterest.com/resource/UserFollowResource/create",
       followers: "https://www.pinterest.com/%s"
     }
     Regex = {
@@ -179,6 +179,18 @@ module Pin
     end
 
     def follow(user_id)
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_uri URLs[:follow]
+      set_payload({
+        source_url: '/sqearlworld/',
+        module_path: 'App(module=[object Object], state_hasSpellCheck=false)',
+        data: data_json({
+          user_id: user_id
+        })
+      })
+      post
+      body
     end
 
     def unfollow(user_id)
