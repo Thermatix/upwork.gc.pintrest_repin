@@ -254,7 +254,9 @@ module Pin
       result = JSON.parse(body)
       results = []
       loop do
-        results += result['resource_response']['data']
+        r = result['resource_response']['data']
+        results += r
+        yield r if block_given?
         bookmark = result['resource']['options']['bookmarks'].first
         break if bookmark == '-end-'
         set_uri subdomain(URLs[:followers]) + query_params({
