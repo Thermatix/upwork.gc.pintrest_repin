@@ -16,7 +16,7 @@ module Pin
       unfollow_user: "https://uk.pinterest.com/resource/UserFollowResource/delete/",
       follow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/create/',
       unfollow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/delete/',
-      followers: "https://www.pinterest.com/%s/followers/"
+      followers: "https://uk.pinterest.com/resource/UserFollowersResource/get?"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
@@ -238,9 +238,38 @@ module Pin
       body
     end
 
-    def followers(of)
-    
+    def followers(username, hffr=true)
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      source_url = '/%s/followers' % username
+      set_uri URLs[:followers] + query_params({
+        source_url: source_url,
+        data: data_json({
+          hide_find_friends_rep: hffr,
+          username: username
+        })
+      })
+      get
+      result = JSON.parse(body)
+      results = []
+      loop do
+        results += result['resource_response']['data']
+        bookmark = result['resource']['options']['bookmarks'].first
+        break if bookmark == '-end-'
+        set_uri URLs[:followers] + query_params({
+          source_url: source_url,
+          data: data_json({
+            bookmarks:[bookmark],
+            hide_find_friends_rep: hffr,
+            username: username
+          })
+        })
+        get
+        result = JSON.parse(body)
+      end
+      results
     end
+
     private
 
     def data_json(opts={})
