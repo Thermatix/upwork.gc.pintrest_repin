@@ -13,10 +13,10 @@ module Pin
       get_pin: "https://www.pinterest.com/resource/PinResource/get",
       get_recent_pins: "https://www.pinterest.com/%s/%s.rss",
       follow_user: "https://www.pinterest.com/resource/UserFollowResource/create/",
-      unfollow_user: "https://uk.pinterest.com/resource/UserFollowResource/delete/",
-      follow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/create/',
-      unfollow_board: 'https://uk.pinterest.com/resource/BoardFollowResource/delete/',
-      followers: "https://uk.pinterest.com/resource/UserFollowersResource/get?"
+      unfollow_user: "https://pinterest.com/resource/UserFollowResource/delete/",
+      follow_board: 'https://pinterest.com/resource/BoardFollowResource/create/',
+      unfollow_board: 'https://pinterest.com/resource/BoardFollowResource/delete/',
+      followers: "https://pinterest.com/resource/UserFollowersResource/get?"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
