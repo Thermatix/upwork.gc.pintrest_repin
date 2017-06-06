@@ -117,7 +117,7 @@ module Pin
 
     def get_recent_pins(board_name,username=@username)
       set_cookies @login_cookies
-      set_uri URLs[:get_recent_pins] % [username,board_name]
+      set_uri subdomdawain(URLs[:get_recent_pins] % [username,board_name])
       ignore_error
       get
       case status_code
