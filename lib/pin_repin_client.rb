@@ -181,10 +181,10 @@ module Pin
       JSON.parse(body)['resource_response']['data']['id']
     end
 
-    def follow(user_name, user_id)
+    def follow_user(user_name, user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:follow]
+      set_uri URLs[:follow_user]
       set_payload({
         source_url: ('/%s/' % user_name),
         module_path: 'App(module=[object Object], state_hasSpellCheck=false)',
@@ -196,14 +196,42 @@ module Pin
       body
     end
 
-    def unfollow(user_name,user_id)
+    def unfollow_user(user_name,user_id)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
-      set_uri URLs[:unfollow]
+      set_uri URLs[:unfollow_user]
       set_payload({
         source_url: ('/%s/' % user_name),
         data: data_json({
           user_id: user_id
+        })
+      })
+      post
+      body
+    end
+
+    def follow_board(user_name,board_name,board_id)
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_uri URLs[:follow_board]
+      set_payload({
+        source_url: ('/%s/%s/' % [user_name,board_name]),
+        data: data_json({
+          board_id: board_id
+        })
+      })
+      post
+      body
+    end
+
+    def unfollow_board(user_name,board_name,board_id)
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_uri URLs[:unfollow_board]
+      set_payload({
+        source_url: ('/%s/%s/' % [user_name,board_name]),
+        data: data_json({
+          board_id: board_id
         })
       })
       post
