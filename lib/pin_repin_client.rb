@@ -11,7 +11,9 @@ module Pin
       create_board: "https://uk.pinterest.com/resource/BoardResource/create/",
       get_pins: "http://pinterestapi.co.uk/%s/pins?page=%s",
       get_pin: "https://www.pinterest.com/resource/PinResource/get",
-      get_recent_pins: "https://www.pinterest.com/%s/%s.rss"
+      get_recent_pins: "https://www.pinterest.com/%s/%s.rss",
+      follow: "https://www.pinterest.com/resource/UserFollowResource/create/%s",
+      followers: "https://www.pinterest.com/%s"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
@@ -176,6 +178,14 @@ module Pin
       JSON.parse(body)['resource_response']['data']['id']
     end
 
+    def follow(user_id)
+    end
+
+    def unfollow(user_id)
+    end
+
+    def followers(of)
+    end
     private
 
     def data_json(opts={})
