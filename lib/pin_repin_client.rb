@@ -3,7 +3,7 @@ require 'json'
 require 'nokogiri'
 module Pin
   class Client
-    attr_reader :username, :login_cookies
+    attr_reader :username, :login_cookies, :uk
     URLs = {
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
@@ -26,9 +26,9 @@ module Pin
     Pin_Validation_Regex =
     include Curb_DSL
     class << self
-      def login(username_or_email, password)
+      def login(username_or_email, password,sub=false)
         self.new do
-          set_uri URLs[:login]
+          set_uri subdomain(URLs[:login])
 
           set_cookies({ ":_auth" => '0',csrftoken: 'K4C0QUu35Eoq1xjajbMluw7hOKibpQSW'})
 
@@ -41,6 +41,7 @@ module Pin
             })
           })
           post
+          @sub = sub
           @username = username_or_email
           @login_cookies = response_cookies
         end
@@ -277,6 +278,10 @@ module Pin
         options: opts,
         context: {}
       }.to_json
+    end
+
+    def subdomain(url)
+    @sub ? '%s.%s' % [@sub, url] : url
     end
 
     def pin(board_id,pin_url)
