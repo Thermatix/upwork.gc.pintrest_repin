@@ -256,7 +256,7 @@ module Pin
       error = false
       loop do
         r = result['resource_response']['data']
-        if result['resource_response']['error']
+        unless r
           error = true
           break
         end
