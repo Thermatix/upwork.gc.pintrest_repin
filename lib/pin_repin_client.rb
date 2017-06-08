@@ -256,7 +256,7 @@ module Pin
       error = false
       loop do
         r = result['resource_response']['data']
-        if r['resource_response']['error']
+        if result['resource_response']['error']
           error = true
           break
         end
@@ -272,7 +272,7 @@ module Pin
             username: username
           })
         })
-        sleep 0.001
+        sleep 0.01
         get
         result = JSON.parse(body)
       end
