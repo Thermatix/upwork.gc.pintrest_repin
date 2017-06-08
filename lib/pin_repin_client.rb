@@ -256,14 +256,14 @@ module Pin
       error = false
       loop do
         r = result['resource_response']['data']
-        bookmark = result['resource']['options']['bookmarks'].first
-        break if bookmark == '-end-'
         if r['resource_response']['error']
           error = true
           break
         end
         yield r if block_given?
         results += r
+        bookmark = result['resource']['options']['bookmarks'].first
+        break if bookmark == '-end-'
         set_uri subdomain(URLs[:followers]) + query_params({
           source_url: source_url,
           data: data_json({
@@ -272,7 +272,7 @@ module Pin
             username: username
           })
         })
-        sleep 0.01
+        sleep 0.001
         get
         result = JSON.parse(body)
       end
