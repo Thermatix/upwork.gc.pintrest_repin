@@ -276,7 +276,7 @@ module Pin
         get
         result = JSON.parse(body)
       end
-      error ? [results,bookmark] : results
+      [results, error ? bookmark : nil]
     end
 
     private
