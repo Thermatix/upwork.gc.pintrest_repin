@@ -252,6 +252,7 @@ module Pin
       }.tap {|h| h.merge({bookmarks: [bookmark_arg]}) if bookmark_arg})
       get
       result = JSON.parse(body)
+      bookmark = result['resource']['options']['bookmarks'].first
       results = []
       error = false
       loop do
