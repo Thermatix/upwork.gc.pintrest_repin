@@ -239,7 +239,7 @@ module Pin
       body
     end
 
-    def followers(username, hffr=true)
+    def followers(username, bookmark_arg=nil, hffr=true)
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
       source_url = '/%s/followers' % username
@@ -249,28 +249,34 @@ module Pin
           hide_find_friends_rep: hffr,
           username: username
         })
-      })
+      }.tap {|h| h.merge({bookmarks: [bookmark_arg]}) if bookmark_arg})
       get
       result = JSON.parse(body)
       results = []
+      error = false
       loop do
         r = result['resource_response']['data']
-        results += r
-        yield r if block_given?
         bookmark = result['resource']['options']['bookmarks'].first
         break if bookmark == '-end-'
+        if r['resource_response']['error']
+          error = true
+          break
+        end
+        yield r if block_given?
+        results += r
         set_uri subdomain(URLs[:followers]) + query_params({
           source_url: source_url,
           data: data_json({
-            bookmarks:[bookmark],
+            bookmarks: [bookmark],
             hide_find_friends_rep: hffr,
             username: username
           })
         })
+        sleep 0.01
         get
         result = JSON.parse(body)
       end
-      results
+      error ? [results,bookmark] : results
     end
 
     private
