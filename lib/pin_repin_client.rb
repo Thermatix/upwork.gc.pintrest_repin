@@ -3,7 +3,8 @@ require 'json'
 require 'nokogiri'
 module Pin
   class Client
-    attr_reader :username, :login_cookies, :sub, :use_proxy
+    attr_reader :username, :login_cookies, :sub
+    attr_accessor :use_proxy
     URLs = {
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
