@@ -16,7 +16,7 @@ module Curb_DSL
         end
       end
 
-      [:password,:username,:payload, :auth_type, :uri, :ssl, :redirects,:type_converter,:cookies,:form_field_name,:error_handler].each do |func_name|
+      [:password,:username,:payload, :auth_type, :uri, :ssl, :redirects,:type_converter,:cookies,:form_field_name,:error_handler, :proxy_url, :proxy_port, :proxy_tunnel, :proxy_pass, :follow_location].each do |func_name|
         define_method "set_#{func_name}" do |value|
           self.instance_variable_set :"@#{func_name}", value
         end
@@ -142,6 +142,10 @@ module Curb_DSL
     http.password = @password || nil
     http.useragent = "curb"
     http.multipart_form_post = @form_field_name ? true : false
+    http.proxy_tunnel = @proxy_tunnel || nil
+    http.proxy_url = @proxy_url || nil
+    http.proxy_port = @proxy_url || nil
+    http.proxypwd = @proxy_pass|| nil
     if @cookies
       http.enable_cookies = true
       http.cookies = (@cookies.is_a? String) ? @cookies : @cookies.inject("") {|cookies,data| "%s%s=%s;" % data.unshift(cookies) }

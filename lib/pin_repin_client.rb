@@ -3,7 +3,7 @@ require 'json'
 require 'nokogiri'
 module Pin
   class Client
-    attr_reader :username, :login_cookies, :sub
+    attr_reader :username, :login_cookies, :sub, :use_proxy
     URLs = {
       login: "https://www.pinterest.com/resource/UserSessionResource/create/",
       repin: "https://www.pinterest.com/resource/RepinResource/create/",
@@ -26,7 +26,7 @@ module Pin
     Pin_Validation_Regex =
     include Curb_DSL
     class << self
-      def login(username_or_email, password,sub=false)
+      def login(username_or_email, password,sub=false,*proxies)
         self.new do
           set_uri subdomain(URLs[:login])
 
@@ -41,9 +41,10 @@ module Pin
             })
           })
           post
-          @sub = sub
           @username = username_or_email
           @login_cookies = response_cookies
+          @sub = sub
+          @proxies = proxies
         end
       end
     end
@@ -280,6 +281,18 @@ module Pin
       [results, error ? bookmark : nil]
     end
 
+    %w{get post delete}.each do |meth|
+      define_method(meth) do
+        if @use_proxy
+          url,port = @proxies[rand(0..(@proxies.length - 1))].split(':')
+          set_proxy_url url
+          set_proxy_port port
+          set_proxy_tunnel  true
+        end
+        super
+      end
+    end
+
     private
 
     def data_json(opts={})
@@ -301,7 +314,7 @@ module Pin
       header 'X-CSRFToken', @login_cookies['csrftoken']
       header 'Referer', pin_url
 
-      set_cookies(@login_cookies)
+      set_cookies @login_cookies
       set_payload({
         source_url: ("/pin/%s/" % pin_id),
         module_path: 'App>ModalManager>Modal>PinCreate>PinCreateBoardPicker>BoardPicker>SelectList(view_type=pinCreate, selected_section_index=undefined, selected_item_index=undefined, highlight_matched_text=true, suppress_hover_events=undefined, scroll_selected_item_into_view=true, select_first_item_after_update=false, item_module=[object Object])',
@@ -318,5 +331,6 @@ module Pin
       post
       JSON.parse(body)['resource_response']['data']['id']
     end
+    
   end
 end
