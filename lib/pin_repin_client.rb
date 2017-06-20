@@ -283,6 +283,8 @@ module Pin
     end
 
     %w{get post delete}.each do |meth|
+      rename = 'old_%s' % meth
+      alias_method rename, meth
       define_method(meth) do
         if @use_proxy
           url,port = @proxies[rand(0..(@proxies.length - 1))].split(':')
@@ -290,7 +292,7 @@ module Pin
           set_proxy_port port
           set_proxy_tunnel  true
         end
-        super
+        send(rename)
       end
     end
 
