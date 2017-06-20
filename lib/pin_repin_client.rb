@@ -50,9 +50,11 @@ module Pin
       end
     end
 
-    def initialize(username_or_email="",login_cookies={},&block)
+    def initialize(username_or_email="",login_cookies={},sub=false,*proxies,&block)
       @username = username_or_email
       @login_cookies = login_cookies
+      @sub = sub
+      @proxies = proxies
       header 'Accept', 'application/json, text/javascript, */*; q=0.01'
       header 'Accept-Language', 'en-US,en;q=0.5'
       header 'Cache-Control', 'no-cache'
