@@ -268,7 +268,7 @@ module Pin
       set_uri subdomain(url) + query_params({
         source_url: source_url,
         data: data_json(data_hash.
-          tap {|h| h.merge({bookmarks: [bookmark_arg]}) if bookmark_arg}
+          tap {|h| h[:bookmarks] = [bookmark_arg] if bookmark_arg}
          )
       })
       get
@@ -289,9 +289,9 @@ module Pin
         bookmark = result['resource']['options']['bookmarks'].first
         set_uri subdomain(url) + query_params({
           source_url: source_url,
-          data: data_json(data_hash.tap {|h| h.merge({bookmarks: bookmark})})
+          data: data_json(data_hash.tap {|h| h[:bookmarks] = [bookmark]})
         })
-        break if prev_bookmark == '-end-'
+        break if prev_bookmark =~ /end/
         sleep 0.01
         get
         result = JSON.parse(body)
