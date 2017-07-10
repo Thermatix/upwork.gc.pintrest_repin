@@ -6,9 +6,12 @@ def pbcopy(input)
   str
 end
 #new login
-client = Pin::Client.login('username','password')
-client = Pin::Client.login('username','password',nil,"123.123.123.123:800","123.123.123.123:800")
-client = Pin::Client.login('username','password',nil,["123.123.123.123:800","123.123.123.123:800"])
+# client = Pin::Client.login('username','password')
+# client.get_pins('upworktest1','-test456','603623224994995584') do | segment|
+#   puts segment
+# end
+# client = Pin::Client.login('username','password',nil,"123.123.123.123:800")
+# client = Pin::Client.login('username','password',nil,["123.123.123.123:800]")
 #store these values (in cookies, session, etc) for use in later requests
 # login_cookies = client.login_cookies
 # username = client.username
