@@ -17,7 +17,8 @@ module Pin
       unfollow_user: "https://pinterest.com/resource/UserFollowResource/delete/",
       follow_board: 'https://pinterest.com/resource/BoardFollowResource/create/',
       unfollow_board: 'https://pinterest.com/resource/BoardFollowResource/delete/',
-      followers: "https://pinterest.com/resource/UserFollowersResource/get?"
+      followers: "https://pinterest.com/resource/UserFollowersResource/get?",
+      board_feed: "https://uk.pinterest.com/resource/BoardFeedResource/get/?"
     }
     Regex = {
       pin_validation:  /^https?:\/\/www\.pinterest\.com\/pin\/(\d+)/,
@@ -141,18 +142,6 @@ module Pin
       end
     end
 
-    # def get_pins(board_id)
-    # keep_going = true
-    # page = 0
-    # results = []
-      # while keep_going
-      #   set_uri subdomain(URLs[:get_pins]  % [@username,page])
-      #   get
-      #   results + JSON.parse(body)['body']
-      #   keep_going = false unless 
-      # end
-    # end
-
     def get_boards
       header 'X-CSRFToken', @login_cookies['csrftoken']
       set_cookies @login_cookies
@@ -243,48 +232,21 @@ module Pin
       body
     end
 
-    def followers(username, bookmark_arg=nil, hffr=true)
-      header 'X-CSRFToken', @login_cookies['csrftoken']
-      set_cookies @login_cookies
-      source_url = '/%s/followers' % username
-      set_uri subdomain(URLs[:followers]) + query_params({
-        source_url: source_url,
-        data: data_json({
-          hide_find_friends_rep: hffr,
-          username: username
-        })
-      }.tap {|h| h.merge({bookmarks: [bookmark_arg]}) if bookmark_arg})
-      get
-      result = JSON.parse(body)
-      bookmark = result['resource']['options']['bookmarks'].first
-      results = []
-      error = false
-      loop do
-        r = result['resource_response']['data']
-        unless r
-          error = true
-          break
-        end
-        yield r if block_given?
-        results += r
-        bookmark = result['resource']['options']['bookmarks'].first
-        break if bookmark == '-end-'
-        set_uri subdomain(URLs[:followers]) + query_params({
-          source_url: source_url,
-          data: data_json({
-            bookmarks: [bookmark],
-            hide_find_friends_rep: hffr,
-            username: username
-          })
-        })
-        sleep 0.01
-        get
-        result = JSON.parse(body)
-      end
-      [results, error ? bookmark : nil]
+    def get_pins(username,board,board_id,bookmark_arg=nil)
+      paginate(URLs[:board_feed],'/%s/%s' % [username,board],bookmark_arg,{
+        board_id: board_id,
+        page_size: 25
+      }) {|segment| yield segment if block_given?}
     end
 
-    %w{get post delete}.each do |meth|
+    def followers(username, bookmark_arg=nil, hffr=true)
+      paginate(URLs[:followers],'/%s/followers' % username,bookmark_arg,{
+          hide_find_friends_rep: hffr,
+          username: username
+      }) {|segment| yield segment if block_given?}
+    end
+
+     %w{get post delete}.each do |meth|
       rename = 'old_%s' % meth
       alias_method rename, meth
       define_method(meth) do
@@ -299,6 +261,45 @@ module Pin
     end
 
     private
+
+    def paginate(url,source_url,bookmark_arg,data_hash)
+      header 'X-CSRFToken', @login_cookies['csrftoken']
+      set_cookies @login_cookies
+      set_uri subdomain(url) + query_params({
+        source_url: source_url,
+        data: data_json(data_hash.
+          tap {|h| h.merge({bookmarks: [bookmark_arg]}) if bookmark_arg}
+         )
+      })
+      get
+      result = JSON.parse(body)
+      bookmark = nil
+      prev_bookmark = nil
+      results = []
+      error = false
+      loop do
+        r = result['resource_response']['data']
+        unless r
+          error = true
+          break
+        end
+        yield r if block_given?
+        results += r
+        prev_bookmark = bookmark
+        bookmark = result['resource']['options']['bookmarks'].first
+        set_uri subdomain(url) + query_params({
+          source_url: source_url,
+          data: data_json(data_hash.tap {|h| h.merge({bookmarks: bookmark})})
+        })
+        break if prev_bookmark == '-end-'
+        sleep 0.01
+        get
+        result = JSON.parse(body)
+      end
+      [results, error ? bookmark : nil]
+    end
+
+
 
     def data_json(opts={})
       {
