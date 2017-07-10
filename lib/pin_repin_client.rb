@@ -232,18 +232,18 @@ module Pin
       body
     end
 
-    def get_pins(username,board,board_id,bookmark_arg=nil)
+    def get_pins(username,board,board_id,bookmark_arg=nil,&block)
       paginate(URLs[:board_feed],'/%s/%s' % [username,board],bookmark_arg,{
         board_id: board_id,
         page_size: 25
-      }) {|segment| yield segment if block_given?}
+      },&block)
     end
 
-    def followers(username, bookmark_arg=nil, hffr=true)
+    def followers(username, bookmark_arg=nil, hffr=true, &block)
       paginate(URLs[:followers],'/%s/followers' % username,bookmark_arg,{
           hide_find_friends_rep: hffr,
           username: username
-      }) {|segment| yield segment if block_given?}
+      },&block)
     end
 
      %w{get post delete}.each do |meth|
